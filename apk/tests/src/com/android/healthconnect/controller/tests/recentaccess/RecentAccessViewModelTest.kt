@@ -419,7 +419,7 @@ class RecentAccessViewModelTest {
 
         fakeRecentAccessUseCase.updateList(accessLogs)
         viewModel.loadRecentAccessApps(timeSource = timeSource)
-        val actual = viewModel.recentAccessApps.getOrAwaitValue(time = 5, callsCount = 2)
+        val actual = viewModel.recentAccessApps.getOrAwaitValue(callsCount = 2)
         val expected =
             listOf(
                 RecentAccessEntry(

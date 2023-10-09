@@ -298,10 +298,7 @@ public abstract class RecordHelper<T extends RecordInternal<?>> {
         }
     }
 
-    /**
-     * Returns ReadSingleTableRequest for {@code request} and package name {@code packageName}
-     *
-     */
+    /** Returns ReadSingleTableRequest for {@code request} and package name {@code packageName} */
     public ReadTableRequest getReadTableRequest(
             ReadRecordsRequestParcel request,
             String packageName,
@@ -344,7 +341,11 @@ public abstract class RecordHelper<T extends RecordInternal<?>> {
     }
 
     /** Returns ReadTableRequest for {@code uuids} */
-    public ReadTableRequest getReadTableRequest(List<UUID> uuids, long startDateAccess) {
+    public ReadTableRequest getReadTableRequest(
+            String packageName,
+            List<UUID> uuids,
+            long startDateAccess,
+            Map<String, Boolean> extraPermsState) {
         return new ReadTableRequest(getMainTableName())
                 .setJoinClause(getJoinForReadRequest())
                 .setWhereClause(
@@ -354,7 +355,9 @@ public abstract class RecordHelper<T extends RecordInternal<?>> {
                                 .addWhereLaterThanTimeClause(
                                         getStartTimeColumnName(), startDateAccess))
                 .setRecordHelper(this)
-                .setExtraReadRequests(getExtraDataReadRequests(uuids, startDateAccess));
+                .setExtraReadRequests(
+                        getExtraDataReadRequests(
+                                packageName, uuids, startDateAccess, extraPermsState));
     }
 
     /**
@@ -373,7 +376,11 @@ public abstract class RecordHelper<T extends RecordInternal<?>> {
      * Returns list if ReadSingleTableRequest for {@code uuids} to populate extra data. Called in
      * change logs read requests.
      */
-    List<ReadTableRequest> getExtraDataReadRequests(List<UUID> uuids, long startDateAccess) {
+    List<ReadTableRequest> getExtraDataReadRequests(
+            String packageName,
+            List<UUID> uuids,
+            long startDateAccess,
+            Map<String, Boolean> extraPermsState) {
         return Collections.emptyList();
     }
 

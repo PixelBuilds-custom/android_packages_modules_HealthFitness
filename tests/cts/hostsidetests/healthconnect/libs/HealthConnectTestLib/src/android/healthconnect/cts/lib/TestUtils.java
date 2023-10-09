@@ -58,6 +58,7 @@ import com.android.cts.install.lib.TestApp;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,6 +73,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class TestUtils {
     static final String TAG = "HealthConnectTest";
+    public static final String READ_EXERCISE_ROUTE_PERMISSION =
+            "android.permission.health.READ_EXERCISE_ROUTE";
     public static final String QUERY_TYPE = "android.healthconnect.cts.queryType";
     public static final String INTENT_EXTRA_CALLING_PKG = "android.healthconnect.cts.calling_pkg";
     public static final String APP_PKG_NAME_USED_IN_DATA_ORIGIN =
@@ -352,7 +355,7 @@ public class TestUtils {
 
     public static ExerciseSessionRecord getExerciseSessionRecord(
             String packageName, double clientId, boolean withRoute) {
-        Instant startTime = Instant.now().minusSeconds(3000);
+        Instant startTime = Instant.now().minusSeconds(3000).truncatedTo(ChronoUnit.MILLIS);
         Instant endTime = Instant.now();
         ExerciseSessionRecord.Builder builder =
                 new ExerciseSessionRecord.Builder(

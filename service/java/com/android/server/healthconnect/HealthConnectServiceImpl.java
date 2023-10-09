@@ -157,6 +157,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -540,7 +541,7 @@ final class HealthConnectServiceImpl extends IHealthConnectService.Stub {
                                 Collections.unmodifiableMap(
                                         mDataPermissionEnforcer
                                                 .collectExtraReadPermissionToStateMapping(
-                                                        request.getRecordType(),
+                                                        Set.of(request.getRecordType()),
                                                         attributionSource));
 
                         Trace.traceBegin(TRACE_TAG_READ, TAG_READ);
@@ -846,9 +847,10 @@ final class HealthConnectServiceImpl extends IHealthConnectService.Stub {
             IChangeLogsResponseCallback callback) {
         final int uid = Binder.getCallingUid();
         final UserHandle userHandle = Binder.getCallingUserHandle();
+        final String callerPackageName = Objects.requireNonNull(attributionSource.getPackageName());
         final HealthConnectServiceLogger.Builder builder =
                 new HealthConnectServiceLogger.Builder(false, GET_CHANGES)
-                        .setPackageName(attributionSource.getPackageName());
+                        .setPackageName(callerPackageName);
 
         HealthConnectThreadScheduler.schedule(
                 mContext,
@@ -881,12 +883,22 @@ final class HealthConnectServiceImpl extends IHealthConnectService.Stub {
                                 ChangeLogsHelper.getInstance()
                                         .getChangeLogs(changeLogsTokenRequest, token);
 
+                        Map<Integer, List<UUID>> recordTypeToInsertedUuids =
+                                ChangeLogsHelper.getRecordTypeToInsertedUuids(
+                                        changeLogsResponse.getChangeLogsMap());
+
+                        Map<String, Boolean> extraReadPermsToGrantState =
+                                mDataPermissionEnforcer.collectExtraReadPermissionToStateMapping(
+                                        recordTypeToInsertedUuids.keySet(), attributionSource);
+
                         List<RecordInternal<?>> recordInternals =
                                 mTransactionManager.readRecords(
                                         new ReadTransactionRequest(
-                                                ChangeLogsHelper.getRecordTypeToInsertedUuids(
-                                                        changeLogsResponse.getChangeLogsMap()),
-                                                startDateAccess));
+                                                callerPackageName,
+                                                recordTypeToInsertedUuids,
+                                                startDateAccess,
+                                                extraReadPermsToGrantState));
+
                         List<DeletedLog> deletedLogs =
                                 ChangeLogsHelper.getDeletedLogs(
                                         changeLogsResponse.getChangeLogsMap());
@@ -1629,14 +1641,11 @@ final class HealthConnectServiceImpl extends IHealthConnectService.Stub {
         } catch (SecurityException | IllegalStateException e) {
             Log.e(TAG, "Exception encountered while staging", e);
             try {
-                @HealthConnectException.ErrorCode int errorCode =
-                        (e instanceof SecurityException) ? ERROR_SECURITY : ERROR_INTERNAL;
-                exceptionsByFileName.put("", new HealthConnectException(
-                        errorCode,
-                        e.getMessage()));
+                @HealthConnectException.ErrorCode
+                int errorCode = (e instanceof SecurityException) ? ERROR_SECURITY : ERROR_INTERNAL;
+                exceptionsByFileName.put("", new HealthConnectException(errorCode, e.getMessage()));
 
-                callback.onError(
-                        new StageRemoteDataException(exceptionsByFileName));
+                callback.onError(new StageRemoteDataException(exceptionsByFileName));
             } catch (RemoteException remoteException) {
                 Log.e(TAG, "Restore permission response could not be sent to the caller.", e);
             }
@@ -1744,15 +1753,12 @@ final class HealthConnectServiceImpl extends IHealthConnectService.Stub {
                     });
         } catch (SecurityException | IllegalStateException e) {
             Log.e(TAG, "getHealthConnectDataState: Exception encountered", e);
-            @HealthConnectException.ErrorCode int errorCode =
-                    (e instanceof SecurityException) ? ERROR_SECURITY
-                            : ERROR_INTERNAL;
+            @HealthConnectException.ErrorCode
+            int errorCode = (e instanceof SecurityException) ? ERROR_SECURITY : ERROR_INTERNAL;
             try {
                 callback.onError(
                         new HealthConnectExceptionParcel(
-                                new HealthConnectException(
-                                        errorCode,
-                                        e.getMessage())));
+                                new HealthConnectException(errorCode, e.getMessage())));
             } catch (RemoteException remoteException) {
                 Log.e(TAG, "getHealthConnectDataState error could not be sent", e);
             }
