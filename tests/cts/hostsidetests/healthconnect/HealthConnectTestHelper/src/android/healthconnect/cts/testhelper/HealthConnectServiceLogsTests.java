@@ -43,6 +43,7 @@ import android.health.connect.changelog.ChangeLogTokenResponse;
 import android.health.connect.changelog.ChangeLogsRequest;
 import android.health.connect.changelog.ChangeLogsResponse;
 import android.health.connect.datatypes.BloodPressureRecord;
+import android.health.connect.datatypes.HeartRateRecord;
 import android.health.connect.datatypes.HeightRecord;
 import android.health.connect.datatypes.Record;
 import android.health.connect.datatypes.StepsRecord;
@@ -356,7 +357,10 @@ public class HealthConnectServiceLogsTests {
         CountDownLatch latch = new CountDownLatch(1);
         assertThat(mHealthConnectManager).isNotNull();
         mHealthConnectManager.getChangeLogToken(
-                new ChangeLogTokenRequest.Builder().build(),
+                new ChangeLogTokenRequest.Builder()
+                        .addRecordType(BloodPressureRecord.class)
+                        .addRecordType(HeartRateRecord.class)
+                        .build(),
                 Executors.newSingleThreadExecutor(),
                 new OutcomeReceiver<>() {
 

@@ -49,6 +49,9 @@ public final class ChangeLogTokenRequest implements Parcelable {
     private ChangeLogTokenRequest(
             @NonNull Set<DataOrigin> dataOriginFilters,
             @NonNull Set<Class<? extends Record>> recordTypes) {
+        if (recordTypes.isEmpty()) {
+            throw new IllegalArgumentException("Requested record types must not be empty");
+        }
         Objects.requireNonNull(recordTypes);
         Objects.requireNonNull(dataOriginFilters);
 
@@ -161,8 +164,8 @@ public final class ChangeLogTokenRequest implements Parcelable {
         private final Set<DataOrigin> mDataOriginFilters = new ArraySet<>();
 
         /**
-         * @param recordType type of record for which change log is required. If not set includes
-         *     all record types
+         * @param recordType type of record for which change log is required. At least one record
+         *     type must be set.
          */
         @NonNull
         public Builder addRecordType(@NonNull Class<? extends Record> recordType) {

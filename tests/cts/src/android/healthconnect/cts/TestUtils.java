@@ -302,6 +302,14 @@ public class TestUtils {
                 buildExerciseSession());
     }
 
+    public static ChangeLogTokenRequest.Builder getChangeLogTokenRequestForTestRecordTypes() {
+        return new ChangeLogTokenRequest.Builder()
+                .addRecordType(StepsRecord.class)
+                .addRecordType(HeartRateRecord.class)
+                .addRecordType(BasalMetabolicRateRecord.class)
+                .addRecordType(ExerciseSessionRecord.class);
+    }
+
     public static List<RecordAndIdentifier> getRecordsAndIdentifiers() {
         return Arrays.asList(
                 new RecordAndIdentifier(RECORD_TYPE_STEPS, getStepsRecord()),

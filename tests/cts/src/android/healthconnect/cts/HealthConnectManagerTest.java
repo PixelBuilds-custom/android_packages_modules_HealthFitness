@@ -1560,7 +1560,8 @@ public class HealthConnectManagerTest {
         }
 
         try {
-            TestUtils.getChangeLogToken(new ChangeLogTokenRequest.Builder().build());
+            TestUtils.getChangeLogToken(
+                    new ChangeLogTokenRequest.Builder().addRecordType(StepsRecord.class).build());
             Assert.fail();
         } catch (HealthConnectException exception) {
             assertThat(exception).isNotNull();
