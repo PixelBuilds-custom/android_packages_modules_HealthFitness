@@ -26,6 +26,8 @@
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.LAUNCH_MULTI_PANE_SETTINGS_DEEP_LINK" />
     <uses-permission android:name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
+    <!-- Used to disable non system apps from showing overlays -->
+    <uses-permission android:name="android.permission.HIDE_OVERLAY_WINDOWS" />
 
     <application
         android:name=".HealthConnectApplication"

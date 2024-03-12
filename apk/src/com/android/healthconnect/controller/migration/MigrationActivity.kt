@@ -20,6 +20,7 @@ import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.view.WindowManager
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.findNavController
 import com.android.healthconnect.controller.R
@@ -169,6 +170,8 @@ class MigrationActivity : Hilt_MigrationActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // This flag ensures a non system app cannot show an overlay on Health Connect. b/313425281
+        window.addSystemFlags(WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS)
         setContentView(R.layout.activity_migration)
     }
 

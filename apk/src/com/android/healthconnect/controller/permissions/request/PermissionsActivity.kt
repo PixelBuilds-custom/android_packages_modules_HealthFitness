@@ -27,6 +27,7 @@ import android.content.pm.PackageManager.EXTRA_REQUEST_PERMISSIONS_RESULTS
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS
 import androidx.activity.viewModels
 import androidx.fragment.app.FragmentActivity
 import com.android.healthconnect.controller.R
@@ -63,6 +64,9 @@ class PermissionsActivity : Hilt_PermissionsActivity() {
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_permissions)
+
+        // This flag ensures a non system app cannot show an overlay on Health Connect. b/313425281
+        window.addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS)
 
         if (!intent.hasExtra(EXTRA_PACKAGE_NAME)) {
             Log.e(TAG, "Invalid Intent Extras, finishing")
